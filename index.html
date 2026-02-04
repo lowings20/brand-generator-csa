@@ -25,6 +25,43 @@
           placeholder="e.g., We're going to use our expertise in suitcases to build custom-made, ultra-durable camping bags for serious outdoor adventurers..."
           rows="4"
         ></textarea>
+
+        <!-- Optional Fields -->
+        <div class="optional-fields">
+          <div class="optional-field">
+            <label for="competencies-input">
+              Tell us about your core competencies
+              <span class="optional-tag">Optional</span>
+            </label>
+            <textarea
+              id="competencies-input"
+              placeholder="e.g., 30 years of expertise in durable materials, patented zipper technology, supply chain relationships with premium fabric suppliers..."
+              rows="2"
+            ></textarea>
+          </div>
+
+          <div class="optional-field">
+            <label for="positioning-input">
+              Tell us about your brand positioning
+              <span class="optional-tag">Optional</span>
+            </label>
+            <textarea
+              id="positioning-input"
+              placeholder="e.g., Premium but accessible, targeting millennials who value quality over quantity, competing with Yeti and Patagonia..."
+              rows="2"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Playful Toggle -->
+        <div class="playful-toggle">
+          <label class="checkbox-label">
+            <input type="checkbox" id="playful-checkbox">
+            <span class="checkbox-custom"></span>
+            <span class="checkbox-text">Make it playful! 🎉</span>
+          </label>
+        </div>
+
         <button class="btn-primary btn-generate" id="generate-btn" onclick="generateBrand()">
           <span class="btn-icon">✨</span>
           GENERATE

@@ -7,7 +7,10 @@ const OPENAI_KEY_STORAGE = 'brand_openai_key';
 let currentBrand = {
   name: '',
   tagline: '',
-  description: ''
+  description: '',
+  competencies: '',
+  positioning: '',
+  isPlayful: false
 };
 
 // Fun loading messages
@@ -80,6 +83,9 @@ function showSection(sectionId) {
 // Generate brand
 async function generateBrand() {
   const description = document.getElementById('business-input').value.trim();
+  const competencies = document.getElementById('competencies-input').value.trim();
+  const positioning = document.getElementById('positioning-input').value.trim();
+  const isPlayful = document.getElementById('playful-checkbox').checked;
 
   if (!description) {
     alert("Tell us about your business idea first! Don't be shy.");
@@ -95,18 +101,21 @@ async function generateBrand() {
   }
 
   currentBrand.description = description;
+  currentBrand.competencies = competencies;
+  currentBrand.positioning = positioning;
+  currentBrand.isPlayful = isPlayful;
 
   showSection('loading-section');
   const loadingInterval = startLoadingAnimation();
 
   try {
     // Step 1: Generate name and tagline with Claude
-    const brandData = await generateBrandText(description, anthropicKey);
+    const brandData = await generateBrandText(anthropicKey);
     currentBrand.name = brandData.name;
     currentBrand.tagline = brandData.tagline;
 
     // Step 2: Generate logo with DALL-E
-    const logoUrl = await generateLogo(brandData.name, brandData.tagline, description, openaiKey);
+    const logoUrl = await generateLogo(brandData.name, brandData.tagline, openaiKey);
 
     // Display results
     clearInterval(loadingInterval);
@@ -121,7 +130,34 @@ async function generateBrand() {
 }
 
 // Generate brand name and tagline using Claude
-async function generateBrandText(description, apiKey) {
+async function generateBrandText(apiKey) {
+  // Build the prompt based on inputs
+  let prompt = `You're a world-class branding expert who has worked with premium brands like Samsonite, Yeti, Tumi, and Patagonia.
+
+Business idea: "${currentBrand.description}"`;
+
+  if (currentBrand.competencies) {
+    prompt += `\n\nCore competencies: "${currentBrand.competencies}"`;
+  }
+
+  if (currentBrand.positioning) {
+    prompt += `\n\nBrand positioning: "${currentBrand.positioning}"`;
+  }
+
+  if (currentBrand.isPlayful) {
+    prompt += `\n\nTONE: Make it PLAYFUL and FUN! Think clever wordplay, approachable language, and a brand that doesn't take itself too seriously. The name should make people smile.`;
+  } else {
+    prompt += `\n\nTONE: Make it PROFESSIONAL and PREMIUM. Think sophisticated, trustworthy, and timeless—like Samsonite, Yeti, or Tumi. The name should convey quality and reliability.`;
+  }
+
+  prompt += `\n\nGenerate a brand name and tagline that would work for a premium, market-leading company.
+
+Respond in JSON format only:
+{
+  "name": "The Brand Name",
+  "tagline": "A compelling tagline that captures the essence"
+}`;
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -135,17 +171,7 @@ async function generateBrandText(description, apiKey) {
       max_tokens: 300,
       messages: [{
         role: 'user',
-        content: `You're a creative branding expert with a playful spirit. Based on this business idea, generate a brand name and tagline.
-
-Business idea: "${description}"
-
-Create something memorable, catchy, and fitting for the business. Match the energy and playfulness of how they described their idea. If they're serious, be polished. If they're fun, be fun!
-
-Respond in JSON format only:
-{
-  "name": "The Brand Name",
-  "tagline": "A catchy tagline that captures the essence"
-}`
+        content: prompt
       }]
     })
   });
@@ -167,8 +193,12 @@ Respond in JSON format only:
 }
 
 // Generate logo using DALL-E
-async function generateLogo(name, tagline, description, apiKey) {
-  const prompt = `A modern, professional logo design for a brand called "${name}". The brand is about: ${description}. Style: Clean, memorable, suitable for a startup. The logo should be iconic and work well at any size. White or transparent background. No text in the image, just the logo mark/symbol.`;
+async function generateLogo(name, tagline, apiKey) {
+  let styleGuide = currentBrand.isPlayful
+    ? "Style: Fun, friendly, approachable, with rounded shapes and warm colors. Think playful but still professional—like Mailchimp or Slack."
+    : "Style: Premium, sophisticated, minimalist, timeless. Think luxury brands like Tumi, Yeti, or Apple. Clean lines, refined, high-end feel.";
+
+  const prompt = `A modern logo design for a premium brand called "${name}". The brand is about: ${currentBrand.description}. ${styleGuide} The logo should be iconic and work well at any size. Clean white background. No text in the image, just the logo mark/symbol.`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
@@ -254,6 +284,30 @@ async function showFlagshipProduct() {
 
 // Generate product description
 async function generateProductDescription(apiKey) {
+  let toneGuide = currentBrand.isPlayful
+    ? "Make it fun and delightful—a product that brings joy and has personality."
+    : "Make it premium and sophisticated—a product that exudes quality and craftsmanship, worthy of brands like Yeti or Tumi.";
+
+  let prompt = `You're creating a flagship product for this brand:
+
+Brand Name: ${currentBrand.name}
+Brand Tagline: ${currentBrand.tagline}
+Business: ${currentBrand.description}`;
+
+  if (currentBrand.competencies) {
+    prompt += `\nCore competencies: ${currentBrand.competencies}`;
+  }
+
+  prompt += `\n\n${toneGuide}
+
+Create a flagship product that would be the hero of this brand's lineup.
+
+Respond in JSON format:
+{
+  "description": "A detailed visual description for generating an image of the product (be specific about colors, materials, style)",
+  "pitch": "A one-sentence exciting pitch for this product"
+}`;
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -267,19 +321,7 @@ async function generateProductDescription(apiKey) {
       max_tokens: 300,
       messages: [{
         role: 'user',
-        content: `You're creating a flagship product for this brand:
-
-Brand Name: ${currentBrand.name}
-Brand Tagline: ${currentBrand.tagline}
-Business: ${currentBrand.description}
-
-Create a flagship product that would be the hero of this brand's lineup.
-
-Respond in JSON format:
-{
-  "description": "A detailed visual description for generating an image of the product (be specific about colors, materials, style)",
-  "pitch": "A one-sentence exciting pitch for this product"
-}`
+        content: prompt
       }]
     })
   });
@@ -335,7 +377,10 @@ async function regenerateProduct() {
 // Start over
 function startOver() {
   document.getElementById('business-input').value = '';
-  currentBrand = { name: '', tagline: '', description: '' };
+  document.getElementById('competencies-input').value = '';
+  document.getElementById('positioning-input').value = '';
+  document.getElementById('playful-checkbox').checked = false;
+  currentBrand = { name: '', tagline: '', description: '', competencies: '', positioning: '', isPlayful: false };
   showSection('input-section');
   document.getElementById('flagship-section').classList.add('hidden');
 }
