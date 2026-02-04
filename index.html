@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brand Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Brand Generator</h1>
+      <p class="subtitle">Turn your business idea into a brand identity</p>
+    </header>
+
+    <!-- Input Section -->
+    <div class="input-section" id="input-section">
+      <div class="card">
+        <label for="business-input">Describe your business idea</label>
+        <textarea
+          id="business-input"
+          placeholder="e.g., We're going to use our expertise in suitcases to build custom-made, ultra-durable camping bags for serious outdoor adventurers..."
+          rows="4"
+        ></textarea>
+        <button class="btn-primary btn-generate" id="generate-btn" onclick="generateBrand()">
+          <span class="btn-icon">✨</span>
+          GENERATE
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-section hidden" id="loading-section">
+      <div class="card loading-card">
+        <div class="loader"></div>
+        <p class="loading-text" id="loading-text">Brewing up something special...</p>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section hidden" id="results-section">
+      <!-- Brand Name -->
+      <div class="card result-card brand-name-card">
+        <div class="result-label">Your Brand Name</div>
+        <h2 class="brand-name" id="brand-name"></h2>
+      </div>
+
+      <!-- Logo -->
+      <div class="card result-card logo-card">
+        <div class="result-label">Your Logo</div>
+        <div class="logo-container">
+          <img id="brand-logo" alt="Generated Logo" />
+        </div>
+      </div>
+
+      <!-- Tagline -->
+      <div class="card result-card tagline-card">
+        <div class="result-label">Your Tagline</div>
+        <p class="tagline" id="brand-tagline"></p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-secondary" onclick="regenerate()">
+          <span class="btn-icon">↻</span>
+          REFRESH
+        </button>
+        <button class="btn-primary btn-flagship" id="flagship-btn" onclick="showFlagshipProduct()">
+          <span class="btn-icon">🚀</span>
+          SHOW ME OUR FLAGSHIP PRODUCT
+        </button>
+      </div>
+
+      <!-- Flagship Product Section -->
+      <div class="card result-card flagship-card hidden" id="flagship-section">
+        <div class="result-label">Your Flagship Product</div>
+        <div class="product-container">
+          <img id="flagship-product" alt="Flagship Product" />
+        </div>
+        <p class="product-description" id="product-description"></p>
+        <button class="btn-text" onclick="regenerateProduct()">
+          <span class="btn-icon">↻</span>
+          Try another product idea
+        </button>
+      </div>
+
+      <!-- Start Over -->
+      <div class="start-over">
+        <button class="btn-text" onclick="startOver()">← Start with a new idea</button>
+      </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="api-modal" class="modal">
+      <div class="modal-content">
+        <h2>API Keys Required</h2>
+        <p>Enter your API keys to generate brands. They're stored locally in your browser.</p>
+
+        <div class="api-field">
+          <label>Anthropic API Key (for text)</label>
+          <input type="password" id="anthropic-key-input" placeholder="sk-ant-...">
+        </div>
+
+        <div class="api-field">
+          <label>OpenAI API Key (for images)</label>
+          <input type="password" id="openai-key-input" placeholder="sk-...">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn-primary" onclick="saveApiKeys()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <button class="settings-btn" onclick="openModal()">⚙️ API Settings</button>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
